@@ -1,11 +1,13 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 from dotenv import load_dotenv
 from flask_restful import Api
 from db import db
 import os
-from controllers.heladeria_controller import Heladeria_Controller
 from models.user import Users
 from flask_login import LoginManager, login_user
+from resources.producto_resource import ProductosResource
+from resources.ventas_resource import VentaResource
+from resources.ingrediente_resource import IngredientesResource, AbastecerIngredienteResource, RenovarInventarioIngredienteResource
 
 
 load_dotenv()
@@ -52,11 +54,17 @@ def login():
 
 @app.route('/resultado')
 def resultado():
-    exito_param = request.args.get('exito', 'false').lower()  # Convierte a minúsculas
+    exito_param = request.args.get('exito', 'false').lower()
     exito = exito_param == 'true'
     return render_template('resultado.html', exito=exito)
 
 
+# Añadir recursos a la API
+api.add_resource(ProductosResource, '/productos','/productos/<int:id>')
+api.add_resource(VentaResource, '/vender/<int:id>') 
+api.add_resource(IngredientesResource, '/ingredientes', '/ingredientes/<int:id>')
+api.add_resource(AbastecerIngredienteResource, '/ingredientes/<int:id>/abastecer')
+api.add_resource(RenovarInventarioIngredienteResource, '/ingredientes/<int:id>/renovar')
 
 if __name__ == "__main__":
     app.run(debug=True)

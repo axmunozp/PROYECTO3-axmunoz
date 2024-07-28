@@ -17,9 +17,7 @@ class Ingredientes(db.Model, Base):
     es_vegetariano = db.Column(Boolean, nullable=False)
     tipo = db.Column(String(20), nullable=False)
     sabor = db.Column(String(50))
-
     
-
     def esSano(self) -> bool:
         return self.calorias < 100 or self.es_vegetariano
 
