@@ -2,9 +2,14 @@ from flask_restful import Resource
 from flask import jsonify, request
 from models.ingrediente import Ingredientes
 from db import db
+from flask_login import current_user
+
+
 
 class IngredientesResource(Resource):
     def get(self, id=None):
+        if not current_user.is_authenticated:
+            return {'error': 'No autorizado'}, 401
         try:
             nombre = request.args.get('nombre')
             essano = request.args.get('essano')
@@ -20,7 +25,7 @@ class IngredientesResource(Resource):
                 return self.obtener_todos_ingredientes()
         except Exception as e:
             return {'error': str(e)}, 500
-
+    
     def obtener_todos_ingredientes(self):
         ingredientes = Ingredientes.query.all()
         ingredientes_list = [self.convertir_ingrediente_a_dict(i) for i in ingredientes]
@@ -32,7 +37,7 @@ class IngredientesResource(Resource):
             return jsonify(self.convertir_ingrediente_a_dict(ingrediente))
         else:
             return {'error': 'Ingrediente no encontrado'}, 404
-
+    
     def obtener_ingredientes_por_nombre(self, nombre):
         ingredientes = Ingredientes.query.filter(Ingredientes.nombre.ilike(f'%{nombre}%')).all()
         if ingredientes:
@@ -40,7 +45,7 @@ class IngredientesResource(Resource):
             return jsonify({'ingredientes': ingredientes_list})
         else:
             return {'error': 'No se encontraron ingredientes con el nombre proporcionado'}, 404
-
+    
     def obtener_sano_ingrediente_por_id(self, id):
         ingrediente = Ingredientes.query.get(id)
         if ingrediente:
@@ -48,7 +53,7 @@ class IngredientesResource(Resource):
             return jsonify({'id': ingrediente.id, 'nombre': ingrediente.nombre, 'es_sano': es_sano})
         else:
             return {'error': 'Ingrediente no encontrado'}, 404
-
+    
     def convertir_ingrediente_a_dict(self, ingrediente):
         return {
             'id': ingrediente.id,
@@ -63,6 +68,8 @@ class IngredientesResource(Resource):
 
 class AbastecerIngredienteResource(Resource):
     def post(self, id):
+        if not current_user.is_authenticated:
+            return {'error': 'No autorizado'}, 401
         try:
             ingrediente = Ingredientes.query.get(id)
             if ingrediente:
@@ -76,6 +83,8 @@ class AbastecerIngredienteResource(Resource):
 
 class RenovarInventarioIngredienteResource(Resource):
     def post(self, id):
+        if not current_user.is_authenticated:
+            return {'error': 'No autorizado'}, 401
         try:
             ingrediente = Ingredientes.query.get(id)
             if ingrediente:

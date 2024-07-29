@@ -1,9 +1,12 @@
 from flask_restful import Resource
 from flask import jsonify, request
 from models.producto import Productos
+from flask_login import current_user
 
 class ProductosResource(Resource):
     def get(self, id=None):
+        if not current_user.is_authenticated:
+            return {'error': 'No autorizado'}, 401
         try:
             nombre = request.args.get('nombre')
             

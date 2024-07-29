@@ -58,6 +58,10 @@ def resultado():
     exito = exito_param == 'true'
     return render_template('resultado.html', exito=exito)
 
+@app.route('/unauthorized')
+def unauthorized():
+    return render_template('unauthorized.html'), 403
+
 
 # Añadir recursos a la API
 api.add_resource(ProductosResource, '/productos','/productos/<int:id>')
