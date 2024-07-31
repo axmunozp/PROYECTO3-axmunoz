@@ -8,13 +8,12 @@ from flask_login import current_user
 
 class IngredientesResource(Resource):
     def get(self, id=None):
-        if not current_user.is_authenticated:
-            return {'error': 'No autorizado'}, 401
         try:
             nombre = request.args.get('nombre')
             essano = request.args.get('essano')
             
             if nombre:
+
                 return self.obtener_ingredientes_por_nombre(nombre)
             elif id:
                 if essano:
@@ -27,11 +26,15 @@ class IngredientesResource(Resource):
             return {'error': str(e)}, 500
     
     def obtener_todos_ingredientes(self):
+        if not current_user.is_authenticated or current_user.is_client():
+            return {'error': 'No autorizado'}, 401
         ingredientes = Ingredientes.query.all()
         ingredientes_list = [self.convertir_ingrediente_a_dict(i) for i in ingredientes]
         return jsonify({'ingredientes': ingredientes_list})
 
     def obtener_ingrediente_por_id(self, id):
+        if not current_user.is_authenticated or current_user.is_client():
+            return {'error': 'No autorizado'}, 401
         ingrediente = Ingredientes.query.get(id)
         if ingrediente:
             return jsonify(self.convertir_ingrediente_a_dict(ingrediente))
@@ -39,6 +42,8 @@ class IngredientesResource(Resource):
             return {'error': 'Ingrediente no encontrado'}, 404
     
     def obtener_ingredientes_por_nombre(self, nombre):
+        if not current_user.is_authenticated or current_user.is_client():
+            return {'error': 'No autorizado'}, 401
         ingredientes = Ingredientes.query.filter(Ingredientes.nombre.ilike(f'%{nombre}%')).all()
         if ingredientes:
             ingredientes_list = [self.convertir_ingrediente_a_dict(i) for i in ingredientes]
@@ -47,6 +52,8 @@ class IngredientesResource(Resource):
             return {'error': 'No se encontraron ingredientes con el nombre proporcionado'}, 404
     
     def obtener_sano_ingrediente_por_id(self, id):
+        if not current_user.is_authenticated or current_user.is_client():
+            return {'error': 'No autorizado'}, 401
         ingrediente = Ingredientes.query.get(id)
         if ingrediente:
             es_sano = ingrediente.esSano()
@@ -68,7 +75,7 @@ class IngredientesResource(Resource):
 
 class AbastecerIngredienteResource(Resource):
     def post(self, id):
-        if not current_user.is_authenticated:
+        if not current_user.is_authenticated or current_user.is_client():
             return {'error': 'No autorizado'}, 401
         try:
             ingrediente = Ingredientes.query.get(id)
@@ -83,7 +90,7 @@ class AbastecerIngredienteResource(Resource):
 
 class RenovarInventarioIngredienteResource(Resource):
     def post(self, id):
-        if not current_user.is_authenticated:
+        if not current_user.is_authenticated or current_user.is_client():
             return {'error': 'No autorizado'}, 401
         try:
             ingrediente = Ingredientes.query.get(id)

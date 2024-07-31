@@ -5,8 +5,6 @@ from flask_login import current_user
 
 class ProductosResource(Resource):
     def get(self, id=None):
-        if not current_user.is_authenticated:
-            return {'error': 'No autorizado'}, 401
         try:
             nombre = request.args.get('nombre')
             
@@ -39,6 +37,8 @@ class ProductosResource(Resource):
             return {'error': 'Producto no encontrado'}, 404
 
     def obtener_productos_por_nombre(self, nombre):
+        if not current_user.is_authenticated or current_user.is_client():
+            return {'error': 'No autorizado'}, 401
         productos = Productos.query.filter(Productos.nombre.ilike(f'%{nombre}%')).all()
         if productos:
             productos_list = [self.convertir_producto_a_dict(p) for p in productos]
@@ -47,6 +47,8 @@ class ProductosResource(Resource):
             return {'error': 'No se encontraron productos con el nombre proporcionado'}, 404
 
     def obtener_calorias_producto_por_id(self, id):
+        if not current_user.is_authenticated:
+            return {'error': 'No autorizado'}, 401
         producto = Productos.query.get(id)
         if producto:
             calorias = producto.calcular_calorias()
@@ -55,6 +57,8 @@ class ProductosResource(Resource):
             return {'error': 'Producto no encontrado'}, 404
 
     def obtener_rentabilidad_producto_por_id(self, id):
+        if not current_user.is_authenticated or not current_user.is_admin():
+            return {'error': 'No autorizado'}, 401
         producto = Productos.query.get(id)
         if producto:
             rentabilidad = producto.calcular_rentabilidad()
@@ -63,6 +67,8 @@ class ProductosResource(Resource):
             return {'error': 'Producto no encontrado'}, 404
 
     def obtener_costo_producto_por_id(self, id):
+        if not current_user.is_authenticated or current_user.is_client():
+            return {'error': 'No autorizado'}, 401
         producto = Productos.query.get(id)
         if producto:
             costo = producto.calcular_costo()
